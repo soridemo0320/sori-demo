@@ -1,5 +1,5 @@
 """
-Generate mel spectrogram PNGs for each demo sample.
+Generate STFT spectrogram PNGs for each demo sample.
 
 One PNG per sample (left channel = input audio).
 
@@ -22,14 +22,13 @@ import matplotlib.pyplot as plt
 SR         = 22050
 HOP_LENGTH = 512
 N_FFT      = 2048
-N_MELS     = 128
-FMAX       = 8000
-T_MAX      = 5.0   # 최대 표시 시간 (초)
+FMAX       = 4000   # 보컬 범위에 맞게 4kHz까지만 표시
+T_MAX      = 5.0
 
 
 def generate_spectrogram(wav_path: str, output_path: str):
     """
-    stereo WAV에서 left channel(=input audio)을 추출해 mel 스펙트로그램 PNG 저장.
+    stereo WAV에서 left channel(=input audio)을 추출해 STFT 스펙트로그램 PNG 저장.
     """
     y, _ = librosa.load(wav_path, sr=SR, mono=False)
     y_left = y[0] if y.ndim == 2 else y
@@ -37,16 +36,18 @@ def generate_spectrogram(wav_path: str, output_path: str):
     t_max = min(y_left.shape[0] / SR, T_MAX)
     y_left = y_left[:int(t_max * SR)]
 
-    S = librosa.feature.melspectrogram(
-        y=y_left, sr=SR, n_fft=N_FFT, hop_length=HOP_LENGTH,
-        n_mels=N_MELS, fmax=FMAX,
-    )
-    S_db = librosa.power_to_db(S, ref=np.max)
+    D = librosa.stft(y_left, n_fft=N_FFT, hop_length=HOP_LENGTH)
+    D_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+
+    # FMAX 이하 빈만 잘라냄
+    bin_max = int(FMAX / (SR / 2) * (N_FFT // 2 + 1)) + 1
+    D_db = D_db[:bin_max, :]
 
     fig, ax = plt.subplots(figsize=(8, 3), dpi=150)
     librosa.display.specshow(
-        S_db, sr=SR, hop_length=HOP_LENGTH,
-        x_axis="time", y_axis="mel", fmax=FMAX,
+        D_db, sr=SR, hop_length=HOP_LENGTH,
+        x_axis="time", y_axis="linear",
+        fmax=FMAX,
         ax=ax, cmap="magma",
     )
     ax.set_xlabel("Time (s)", fontsize=9)
@@ -61,7 +62,7 @@ def generate_spectrogram(wav_path: str, output_path: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate mel spectrogram PNGs for demo page.")
+    parser = argparse.ArgumentParser(description="Generate STFT spectrogram PNGs for demo page.")
     parser.add_argument(
         "--audio_dir", default=".",
         help="Root dir containing sample subdirs (e.g. 000852_4.0/). Default: current dir"
