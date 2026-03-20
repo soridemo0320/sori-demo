@@ -55,30 +55,26 @@
     }
     .input-spec-img {
       display: block;
+      max-width: 500px;
       width: 100%;
-      max-width: 900px;
       height: auto;
       border: 1px solid #bbb;
       border-radius: 6px;
       margin-bottom: 10px;
     }
-    .audio-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .audio-item {
       margin-top: 6px;
     }
-    .audio-row-label {
-      font-size: 0.8em;
+    .audio-item-label {
+      font-size: 0.78em;
       color: #555;
-      white-space: nowrap;
-      min-width: 130px;
+      margin-bottom: 3px;
     }
-    audio {
-      flex: 1;
-      min-width: 0;
-      max-width: 600px;
-      height: 32px;
+    .audio-item audio {
+      display: block;
+      width: 100%;
+      max-width: 500px;
+      height: 30px;
     }
 
     /* ── System block ────────────────────────────────────────── */
@@ -103,14 +99,14 @@
     /* ── Cell ────────────────────────────────────────────────── */
     .cell {
       flex: 1;
-      min-width: 155px;
+      min-width: 200px;
       border: 1px solid #ddd;
       border-radius: 7px;
       padding: 9px 10px;
       background: #f7f7f7;
     }
     .baselines-section .cell {
-      min-width: 200px;
+      min-width: 220px;
     }
     .cell-header {
       font-size: 0.8em;
@@ -119,17 +115,16 @@
       text-align: center;
       margin-bottom: 8px;
     }
-    .cell .audio-row {
+    .cell .audio-item {
       margin-top: 0;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
-    .cell .audio-row-label {
-      min-width: 110px;
+    .cell .audio-item-label {
       font-size: 0.72em;
     }
-    .cell audio {
+    .cell .audio-item audio {
       max-width: none;
-      height: 28px;
+      height: 30px;
     }
 
     /* ── References ──────────────────────────────────────────── */
@@ -188,11 +183,12 @@ function audioPath(s, variant) {
 function attachChannelRoute(audioEl, mode) {
   if (mode === "stereo") return;
   let done = false;
-  audioEl.addEventListener("play", () => {
+  audioEl.addEventListener("play", async () => {
     if (done) return;
     done = true;
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state !== "running") await ctx.resume();
       const src = ctx.createMediaElementSource(audioEl);
       const ch = mode === "left" ? 0 : 1;
       const split = ctx.createChannelSplitter(2);
@@ -202,29 +198,30 @@ function attachChannelRoute(audioEl, mode) {
       split.connect(merge, ch, 1);
       merge.connect(ctx.destination);
     } catch (e) {
-      // fallback: stereo
+      console.warn("Channel routing failed, playing stereo:", e);
+      done = false; // allow retry
     }
   });
 }
 
 // ── UI helpers ───────────────────────────────────────────────────
-function mkAudioRow(label, url, mode) {
-  const row = document.createElement("div");
-  row.className = "audio-row";
+function mkAudioItem(label, url, mode) {
+  const item = document.createElement("div");
+  item.className = "audio-item";
 
   const lbl = document.createElement("div");
-  lbl.className = "audio-row-label";
+  lbl.className = "audio-item-label";
   lbl.textContent = label;
-  row.appendChild(lbl);
+  item.appendChild(lbl);
 
   const audio = document.createElement("audio");
   audio.src = url;
   audio.controls = true;
   audio.preload = "none";
   attachChannelRoute(audio, mode);
-  row.appendChild(audio);
+  item.appendChild(audio);
 
-  return row;
+  return item;
 }
 
 function mkCell(sample, variant, headerLabel) {
@@ -237,8 +234,8 @@ function mkCell(sample, variant, headerLabel) {
   cell.appendChild(hdr);
 
   const url = audioPath(sample, variant);
-  cell.appendChild(mkAudioRow("Rendered (Mono)", url, "right"));
-  cell.appendChild(mkAudioRow("Input+rendered (Stereo)", url, "stereo"));
+  cell.appendChild(mkAudioItem("Rendered", url, "right"));
+  cell.appendChild(mkAudioItem("Input+rendered", url, "stereo"));
   return cell;
 }
 
@@ -277,11 +274,11 @@ function buildSample(s, idx) {
   const img = document.createElement("img");
   img.src = `images/${s.id}_spec.png`;
   img.className = "input-spec-img";
-  img.alt = "CQT spectrogram of input audio";
+  img.alt = "Mel spectrogram of input audio";
   inputSec.appendChild(img);
 
   const inputUrl = audioPath(s, "300k_sori_0.0");
-  inputSec.appendChild(mkAudioRow("Input audio", inputUrl, "left"));
+  inputSec.appendChild(mkAudioItem("Input audio", inputUrl, "left"));
   card.appendChild(inputSec);
 
   // Sori (Proposed)
