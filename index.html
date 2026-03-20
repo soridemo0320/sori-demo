@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audio Demo</title>
+  <title>Audio demo</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -11,379 +11,307 @@
       font-family: 'Segoe UI', Arial, sans-serif;
       max-width: 1500px;
       margin: 0 auto;
-      padding: 24px 20px;
-      background: #f5f5f5;
-      color: #333;
+      padding: 28px 24px;
+      background: #ebebeb;
+      color: #222;
     }
 
     h1 {
-      font-size: 1.6em;
+      font-size: 1.5em;
+      font-weight: 700;
       text-align: center;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
+      color: #111;
     }
     .subtitle {
       text-align: center;
-      color: #777;
-      font-size: 0.95em;
-      margin-bottom: 28px;
-    }
-
-    /* ── Sample section ──────────────────────────────────────── */
-    .sample-section {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 20px 24px;
+      color: #888;
+      font-size: 0.88em;
       margin-bottom: 32px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    }
-    .sample-header {
-      font-size: 1.15em;
-      font-weight: 700;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #eee;
     }
 
-    /* ── Input audio row ─────────────────────────────────────── */
-    .input-row {
-      display: flex;
-      align-items: center;
-      gap: 20px;
+    /* ── Sample card ─────────────────────────────────────────── */
+    .sample-card {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 22px 24px;
+      margin-bottom: 32px;
+    }
+    .sample-title {
+      font-size: 1.05em;
+      font-weight: 700;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #ddd;
+      color: #111;
+    }
+
+    /* ── Input section ───────────────────────────────────────── */
+    .input-section {
       margin-bottom: 22px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e4e4e4;
     }
     .input-spec-img {
-      width: 280px;
+      display: block;
+      width: 100%;
+      max-width: 900px;
       height: auto;
-      border: 1px solid #ccc;
+      border: 1px solid #bbb;
       border-radius: 6px;
-      flex-shrink: 0;
-    }
-    .input-label {
-      font-weight: 600;
-      font-size: 0.95em;
       margin-bottom: 10px;
-      color: #444;
+    }
+    .audio-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .audio-row-label {
+      font-size: 0.8em;
+      color: #555;
+      white-space: nowrap;
+      min-width: 130px;
+    }
+    audio {
+      flex: 1;
+      min-width: 0;
+      max-width: 600px;
+      height: 32px;
     }
 
-    /* ── System section ──────────────────────────────────────── */
+    /* ── System block ────────────────────────────────────────── */
     .system-block {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .system-title {
+      font-size: 0.78em;
       font-weight: 700;
-      font-size: 0.9em;
-      color: #333;
-      margin-bottom: 8px;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      color: #555;
+      margin-bottom: 8px;
     }
     .cells-row {
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding-bottom: 4px;
+      padding-bottom: 2px;
     }
 
     /* ── Cell ────────────────────────────────────────────────── */
     .cell {
       flex: 1;
-      min-width: 150px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 8px;
-      background: #fafafa;
-      text-align: center;
+      min-width: 155px;
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      padding: 9px 10px;
+      background: #f7f7f7;
+    }
+    .baselines-section .cell {
+      min-width: 200px;
     }
     .cell-header {
       font-size: 0.8em;
-      color: #555;
-      margin-bottom: 6px;
       font-style: italic;
-      white-space: nowrap;
+      color: #444;
+      text-align: center;
+      margin-bottom: 8px;
     }
-    .cell-spec-img {
-      width: 100%;
-      height: 72px;
-      object-fit: cover;
-      object-position: left center;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      margin-bottom: 6px;
-      display: block;
+    .cell .audio-row {
+      margin-top: 0;
+      margin-bottom: 4px;
     }
-
-    /* ── Buttons ─────────────────────────────────────────────── */
-    .btn {
-      display: block;
-      width: 100%;
-      margin: 3px 0;
-      padding: 5px 6px;
-      font-size: 0.75em;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: opacity 0.15s, background 0.15s;
-      white-space: nowrap;
+    .cell .audio-row-label {
+      min-width: 110px;
+      font-size: 0.72em;
     }
-    .btn:disabled { cursor: not-allowed; opacity: 0.6; }
-
-    .btn-input  { background: #4a90d9; color: white; font-size: 0.88em; padding: 7px 14px; border-radius: 6px; }
-    .btn-input:hover:not(:disabled)  { background: #3a7bc8; }
-    .btn-mono   { background: #5ba35b; color: white; }
-    .btn-mono:hover:not(:disabled)   { background: #4a8f4a; }
-    .btn-stereo { background: #d4882a; color: white; }
-    .btn-stereo:hover:not(:disabled) { background: #be7824; }
-
-    .btn.playing { outline: 2px solid rgba(0,0,0,0.25); }
-    .btn-stop { background: #c0392b !important; }
+    .cell audio {
+      max-width: none;
+      height: 28px;
+    }
 
     /* ── References ──────────────────────────────────────────── */
     .references {
       margin-top: 40px;
-      font-size: 0.82em;
-      color: #666;
-      border-top: 1px solid #ddd;
-      padding-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid #ccc;
+      font-size: 0.78em;
+      color: #888;
+      line-height: 1.7;
     }
-    .references p { margin-bottom: 4px; }
   </style>
 </head>
 <body>
 
-  <h1>Audio Demo</h1>
+  <h1>Audio demo</h1>
   <p class="subtitle">Anonymous submission</p>
 
   <div id="container"></div>
 
   <div class="references">
-    <p>[1] Bitteur, J. et al. (Deep Salience)</p>
-    <p>[2] Bitteur, J. et al. (Basic Pitch)</p>
-    <p>[3] Bitteur, J. et al. (Timbre Trap)</p>
+    <p>[1] ... (Deep Salience)</p>
+    <p>[2] ... (Basic Pitch)</p>
+    <p>[3] ... (Timbre Trap)</p>
   </div>
 
-  <script>
-  // ── Data ─────────────────────────────────────────────────────────
-  const SAMPLES = [
-    { id: "000852", dir: "000852_4.0", ytId: "1VTxnf2hZ0w" },
-    { id: "001239", dir: "001239_4.0", ytId: "2m9rVrVNa6A" },
-    { id: "001349", dir: "001349_4.0", ytId: "37UUg0fwzsw" },
-    { id: "001376", dir: "001376_4.5", ytId: "3EcfiEc08zY" },
-    { id: "001383", dir: "001383_5.0", ytId: "3FYXBkD5bYk" },
-    { id: "001676", dir: "001676_4.3", ytId: "4G92jhdrbhs" },
-    { id: "001902", dir: "001902_4.0", ytId: "54LSA7aZTBA" },
-    { id: "002009", dir: "002009_5.0", ytId: "5Y_mT93tkvQ" },
-    { id: "002037", dir: "002037_5.5", ytId: "5e8dnZnkLkw" },
-    { id: "002044", dir: "002044_5.0", ytId: "5fzwZ3YnYi8" },
-  ];
+<script>
+// ── Data ─────────────────────────────────────────────────────────
+const SAMPLES = [
+  { id: "000852", dir: "000852_4.0", ytId: "1VTxnf2hZ0w" },
+  { id: "001239", dir: "001239_4.0", ytId: "2m9rVrVNa6A" },
+  { id: "001349", dir: "001349_4.0", ytId: "37UUg0fwzsw" },
+  { id: "001376", dir: "001376_4.5", ytId: "3EcfiEc08zY" },
+  { id: "001383", dir: "001383_5.0", ytId: "3FYXBkD5bYk" },
+  { id: "001676", dir: "001676_4.3", ytId: "4G92jhdrbhs" },
+  { id: "001902", dir: "001902_4.0", ytId: "54LSA7aZTBA" },
+  { id: "002009", dir: "002009_5.0", ytId: "5Y_mT93tkvQ" },
+  { id: "002037", dir: "002037_5.5", ytId: "5e8dnZnkLkw" },
+  { id: "002044", dir: "002044_5.0", ytId: "5fzwZ3YnYi8" },
+];
 
-  const GAMMAS = [0.0, 0.5, 1.0, 2.0, 3.0];
+const GAMMAS = [0.0, 0.5, 1.0, 2.0, 3.0];
 
-  const BASELINES = [
-    { suffix: "ds", label: "Deep Salience [1]" },
-    { suffix: "bp", label: "Basic Pitch [2]" },
-    { suffix: "tt", label: "Timbre Trap [3]" },
-  ];
+const BASELINES = [
+  { suffix: "ds", label: "Deep Salience [1]" },
+  { suffix: "bp", label: "Basic Pitch [2]" },
+  { suffix: "tt", label: "Timbre Trap [3]" },
+];
 
-  // ── Audio path helper ─────────────────────────────────────────────
-  function audioPath(s, variant) {
-    return `${s.dir}/${s.id}_${s.ytId}_${variant}.wav`;
-  }
+function audioPath(s, variant) {
+  return `${s.dir}/${s.id}_${s.ytId}_${variant}.wav`;
+}
 
-  // ── Web Audio playback ────────────────────────────────────────────
-  let ctx = null;
-  let currentSource = null;
-  let activeBtn = null;
-  const cache = {};
-
-  function getCtx() {
-    if (!ctx || ctx.state === "closed") {
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    return ctx;
-  }
-
-  function stopCurrent() {
-    if (currentSource) {
-      try { currentSource.stop(); } catch (_) {}
-      currentSource = null;
-    }
-    if (activeBtn) {
-      activeBtn.textContent = activeBtn._orig;
-      activeBtn.classList.remove("playing", "btn-stop");
-      activeBtn = null;
-    }
-  }
-
-  async function playAudio(url, mode, btn) {
-    if (activeBtn === btn) { stopCurrent(); return; }
-    stopCurrent();
-
-    const ac = getCtx();
-    if (ac.state === "suspended") await ac.resume();
-
-    btn._orig = btn._orig || btn.textContent;
-    btn.textContent = "⏳";
-    btn.disabled = true;
-
+// ── Channel routing via Web Audio API ────────────────────────────
+// Works on HTTPS (GitHub Pages). On file:// falls back to stereo.
+function attachChannelRoute(audioEl, mode) {
+  if (mode === "stereo") return;
+  let done = false;
+  audioEl.addEventListener("play", () => {
+    if (done) return;
+    done = true;
     try {
-      if (!cache[url]) {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-        const ab = await res.arrayBuffer();
-        cache[url] = await ac.decodeAudioData(ab);
-      }
-      const buf = cache[url];
-      const src = ac.createBufferSource();
-      src.buffer = buf;
-
-      if (mode === "stereo") {
-        src.connect(ac.destination);
-      } else {
-        const ch = mode === "left" ? 0 : 1;
-        const split  = ac.createChannelSplitter(2);
-        const merge  = ac.createChannelMerger(2);
-        src.connect(split);
-        split.connect(merge, ch, 0);  // → L
-        split.connect(merge, ch, 1);  // → R (duplicate for mono)
-        merge.connect(ac.destination);
-      }
-
-      src.onended = () => {
-        if (currentSource === src) stopCurrent();
-      };
-
-      btn.textContent = "⏹ Stop";
-      btn.classList.add("playing", "btn-stop");
-      btn.disabled = false;
-      activeBtn = btn;
-      currentSource = src;
-      src.start();
-    } catch (err) {
-      btn.textContent = btn._orig;
-      btn.disabled = false;
-      console.error(err);
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = ctx.createMediaElementSource(audioEl);
+      const ch = mode === "left" ? 0 : 1;
+      const split = ctx.createChannelSplitter(2);
+      const merge = ctx.createChannelMerger(2);
+      src.connect(split);
+      split.connect(merge, ch, 0);
+      split.connect(merge, ch, 1);
+      merge.connect(ctx.destination);
+    } catch (e) {
+      // fallback: stereo
     }
+  });
+}
+
+// ── UI helpers ───────────────────────────────────────────────────
+function mkAudioRow(label, url, mode) {
+  const row = document.createElement("div");
+  row.className = "audio-row";
+
+  const lbl = document.createElement("div");
+  lbl.className = "audio-row-label";
+  lbl.textContent = label;
+  row.appendChild(lbl);
+
+  const audio = document.createElement("audio");
+  audio.src = url;
+  audio.controls = true;
+  audio.preload = "none";
+  attachChannelRoute(audio, mode);
+  row.appendChild(audio);
+
+  return row;
+}
+
+function mkCell(sample, variant, headerLabel) {
+  const cell = document.createElement("div");
+  cell.className = "cell";
+
+  const hdr = document.createElement("div");
+  hdr.className = "cell-header";
+  hdr.textContent = headerLabel;
+  cell.appendChild(hdr);
+
+  const url = audioPath(sample, variant);
+  cell.appendChild(mkAudioRow("Rendered (Mono)", url, "right"));
+  cell.appendChild(mkAudioRow("Input+rendered (Stereo)", url, "stereo"));
+  return cell;
+}
+
+function mkSystemBlock(title, entries, sample, extraClass) {
+  const block = document.createElement("div");
+  block.className = "system-block" + (extraClass ? " " + extraClass : "");
+
+  const titleEl = document.createElement("div");
+  titleEl.className = "system-title";
+  titleEl.textContent = title;
+  block.appendChild(titleEl);
+
+  const row = document.createElement("div");
+  row.className = "cells-row";
+  for (const e of entries) {
+    row.appendChild(mkCell(sample, e.variant, e.label));
   }
+  block.appendChild(row);
+  return block;
+}
 
-  // ── UI helpers ────────────────────────────────────────────────────
-  function mkBtn(text, cls, url, mode) {
-    const b = document.createElement("button");
-    b.className = `btn ${cls}`;
-    b.textContent = text;
-    b._orig = text;
-    b.onclick = () => playAudio(url, mode, b);
-    return b;
-  }
+// ── Build sample card ─────────────────────────────────────────────
+function buildSample(s, idx) {
+  const card = document.createElement("div");
+  card.className = "sample-card";
 
-  function mkCell(sample, variant, label) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
+  const title = document.createElement("div");
+  title.className = "sample-title";
+  title.textContent = `Sample ${idx + 1}`;
+  card.appendChild(title);
 
-    const hdr = document.createElement("div");
-    hdr.className = "cell-header";
-    hdr.textContent = label;
-    cell.appendChild(hdr);
+  // Input section: spectrogram + input audio player
+  const inputSec = document.createElement("div");
+  inputSec.className = "input-section";
 
-    // spectrogram thumbnail (same image for all variants in this sample)
-    const img = document.createElement("img");
-    img.src = `images/${sample.id}_spec.png`;
-    img.className = "cell-spec-img";
-    img.alt = "CQT spectrogram";
-    cell.appendChild(img);
+  const img = document.createElement("img");
+  img.src = `images/${s.id}_spec.png`;
+  img.className = "input-spec-img";
+  img.alt = "CQT spectrogram of input audio";
+  inputSec.appendChild(img);
 
-    const url = audioPath(sample, variant);
-    cell.appendChild(mkBtn("▶ Rendered (Mono)",         "btn-mono",   url, "right"));
-    cell.appendChild(mkBtn("▶ Input+Rendered (Stereo)", "btn-stereo", url, "stereo"));
-    return cell;
-  }
+  const inputUrl = audioPath(s, "300k_sori_0.0");
+  inputSec.appendChild(mkAudioRow("Input audio", inputUrl, "left"));
+  card.appendChild(inputSec);
 
-  // ── Build one sample section ──────────────────────────────────────
-  function buildSample(s, idx) {
-    const sec = document.createElement("div");
-    sec.className = "sample-section";
+  // Sori (Proposed)
+  card.appendChild(mkSystemBlock(
+    "Sori (Proposed)",
+    GAMMAS.map(g => ({ variant: `300k_sori_${g.toFixed(1)}`, label: `γ = ${g.toFixed(1)}` })),
+    s
+  ));
 
-    // header
-    const hdr = document.createElement("div");
-    hdr.className = "sample-header";
-    hdr.textContent = `Sample ${idx + 1}`;
-    sec.appendChild(hdr);
+  // Sori (w/o DAT)
+  card.appendChild(mkSystemBlock(
+    "Sori (w/o DAT)",
+    GAMMAS.map(g => ({ variant: `300k_sori_no_adv_${g.toFixed(1)}`, label: `γ = ${g.toFixed(1)}` })),
+    s
+  ));
 
-    // ── Input audio row
-    const inputRow = document.createElement("div");
-    inputRow.className = "input-row";
+  // Baselines
+  card.appendChild(mkSystemBlock(
+    "Baselines",
+    BASELINES.map(b => ({ variant: b.suffix, label: b.label })),
+    s,
+    "baselines-section"
+  ));
 
-    const specImg = document.createElement("img");
-    specImg.src = `images/${s.id}_spec.png`;
-    specImg.className = "input-spec-img";
-    specImg.alt = "CQT spectrogram of input audio";
-    inputRow.appendChild(specImg);
+  return card;
+}
 
-    const inputInfo = document.createElement("div");
-    const lbl = document.createElement("div");
-    lbl.className = "input-label";
-    lbl.textContent = "Input Audio";
-    inputInfo.appendChild(lbl);
-    // Use left channel of any sori file (all share the same input)
-    const inputUrl = audioPath(s, "300k_sori_0.0");
-    inputInfo.appendChild(mkBtn("▶ Play Input Audio", "btn-input", inputUrl, "left"));
-    inputRow.appendChild(inputInfo);
-    sec.appendChild(inputRow);
-
-    // ── Sori (Proposed)
-    sec.appendChild(mkSystemBlock(
-      "Sori (Proposed)",
-      GAMMAS.map(g => ({
-        variant: `300k_sori_${g.toFixed(1)}`,
-        label: `γ = ${g.toFixed(1)}`,
-      })),
-      s
-    ));
-
-    // ── Sori (w/o DAT)
-    sec.appendChild(mkSystemBlock(
-      "Sori (w/o DAT)",
-      GAMMAS.map(g => ({
-        variant: `300k_sori_no_adv_${g.toFixed(1)}`,
-        label: `γ = ${g.toFixed(1)}`,
-      })),
-      s
-    ));
-
-    // ── Baselines
-    sec.appendChild(mkSystemBlock(
-      "Baselines",
-      BASELINES.map(b => ({ variant: b.suffix, label: b.label })),
-      s
-    ));
-
-    return sec;
-  }
-
-  function mkSystemBlock(title, entries, sample) {
-    const block = document.createElement("div");
-    block.className = "system-block";
-
-    const titleEl = document.createElement("div");
-    titleEl.className = "system-title";
-    titleEl.textContent = title;
-    block.appendChild(titleEl);
-
-    const row = document.createElement("div");
-    row.className = "cells-row";
-    for (const e of entries) {
-      row.appendChild(mkCell(sample, e.variant, e.label));
-    }
-    block.appendChild(row);
-    return block;
-  }
-
-  // ── Render all samples ────────────────────────────────────────────
-  const container = document.getElementById("container");
-  SAMPLES.forEach((s, i) => container.appendChild(buildSample(s, i)));
-
-  </script>
+// ── Render ────────────────────────────────────────────────────────
+const container = document.getElementById("container");
+SAMPLES.forEach((s, i) => container.appendChild(buildSample(s, i)));
+</script>
 </body>
 </html>

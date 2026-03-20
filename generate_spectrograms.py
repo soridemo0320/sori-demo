@@ -27,11 +27,10 @@ CQT_SR           = 16000
 CQT_HOP_LENGTH   = 160                       # 10ms @ 16kHz
 T_MAX            = 5.0                       # 최대 표시 시간 (초)
 
-# y축 tick (plot_cqt_midi_overlay.py와 동일)
-MIDI_TICKS   = [21, 36, 48, 60, 72, 84, 96, 108]
-BIN_TICKS    = [(p - 21) * 3 for p in MIDI_TICKS]
-HZ_LABELS    = [f"{librosa.midi_to_hz(p):.0f} Hz" for p in MIDI_TICKS]
-PITCH_LABELS = [f"{librosa.midi_to_note(p)} ({p})" for p in MIDI_TICKS]
+# y축 tick
+MIDI_TICKS = [21, 36, 48, 60, 72, 84, 96, 108]
+BIN_TICKS  = [(p - 21) * 3 for p in MIDI_TICKS]
+HZ_LABELS  = [f"{librosa.midi_to_hz(p):.0f} Hz" for p in MIDI_TICKS]
 
 
 def generate_spectrogram(wav_path: str, output_path: str):
@@ -56,8 +55,8 @@ def generate_spectrogram(wav_path: str, output_path: str):
     t_max = min(duration, T_MAX)
 
     # 시각화
-    fig, ax1 = plt.subplots(figsize=(7, 4), dpi=150)
-    ax1.imshow(
+    fig, ax = plt.subplots(figsize=(12, 5), dpi=150)
+    ax.imshow(
         C_db,
         aspect="auto",
         origin="lower",
@@ -67,18 +66,12 @@ def generate_spectrogram(wav_path: str, output_path: str):
         vmin=C_db.max() - 80,
         vmax=C_db.max(),
     )
-    ax1.set_ylabel("Frequency (Hz)", fontsize=10)
-    ax1.set_yticks(BIN_TICKS)
-    ax1.set_yticklabels(HZ_LABELS, fontsize=8)
-    ax1.set_ylim(0, CQT_N_BINS - 1)
-    ax1.set_xlabel("Time (s)", fontsize=10)
-    ax1.set_xlim(0, t_max)
-
-    ax2 = ax1.twinx()
-    ax2.set_ylim(ax1.get_ylim())
-    ax2.set_yticks(BIN_TICKS)
-    ax2.set_yticklabels(PITCH_LABELS, fontsize=8)
-    ax2.set_ylabel("MIDI Pitch", fontsize=10)
+    ax.set_ylabel("Frequency (Hz)", fontsize=10)
+    ax.set_yticks(BIN_TICKS)
+    ax.set_yticklabels(HZ_LABELS, fontsize=8)
+    ax.set_ylim(0, CQT_N_BINS - 1)
+    ax.set_xlabel("Time (s)", fontsize=10)
+    ax.set_xlim(0, t_max)
 
     plt.tight_layout()
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
