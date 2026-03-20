@@ -178,8 +178,42 @@ function audioPath(s, variant) {
   return `${s.prefix}_${variant}.wav?${CACHE_BUST}`;
 }
 
+// ── Channel routing via Web Audio API ────────────────────────────
+let sharedCtx = null;
+function getCtx() {
+  if (!sharedCtx) {
+    try { sharedCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { return null; }
+  }
+  return sharedCtx;
+}
+document.addEventListener("click", () => {
+  if (sharedCtx && sharedCtx.state === "suspended") sharedCtx.resume();
+}, { once: false });
+
+function attachChannelRoute(audioEl, mode) {
+  audioEl.addEventListener("play", () => {
+    if (sharedCtx && sharedCtx.state === "suspended") sharedCtx.resume();
+  });
+  if (mode === "stereo") return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const src = ctx.createMediaElementSource(audioEl);
+    const ch = mode === "left" ? 0 : 1;
+    const split = ctx.createChannelSplitter(2);
+    const merge = ctx.createChannelMerger(2);
+    src.connect(split);
+    split.connect(merge, ch, 0);
+    split.connect(merge, ch, 1);
+    merge.connect(ctx.destination);
+  } catch (e) {
+    console.warn("Channel routing failed:", e);
+  }
+}
+
 // ── UI helpers ───────────────────────────────────────────────────
-function mkAudioItem(label, url) {
+function mkAudioItem(label, url, mode) {
   const item = document.createElement("div");
   item.className = "audio-item";
 
@@ -192,6 +226,8 @@ function mkAudioItem(label, url) {
   audio.src = url;
   audio.controls = true;
   audio.preload = "none";
+  audio.crossOrigin = "anonymous";
+  attachChannelRoute(audio, mode);
   item.appendChild(audio);
 
   return item;
@@ -207,8 +243,8 @@ function mkCell(sample, variant, headerLabel) {
   cell.appendChild(hdr);
 
   const url = audioPath(sample, variant);
-  cell.appendChild(mkAudioItem("Rendered", url));
-  cell.appendChild(mkAudioItem("Input + Rendered", url));
+  cell.appendChild(mkAudioItem("Rendered", url, "right"));
+  cell.appendChild(mkAudioItem("Input + Rendered", url, "stereo"));
   return cell;
 }
 
@@ -251,7 +287,7 @@ function buildSample(s, idx) {
   inputSec.appendChild(img);
 
   const inputUrl = audioPath(s, "300k_sori_0.0");
-  inputSec.appendChild(mkAudioItem("Input Audio", inputUrl));
+  inputSec.appendChild(mkAudioItem("Input Audio", inputUrl, "left"));
   card.appendChild(inputSec);
 
   // Sori (Proposed)
