@@ -43,7 +43,7 @@ def generate_spectrogram(wav_path: str, output_path: str):
     bin_max = int(FMAX / (SR / 2) * (N_FFT // 2 + 1)) + 1
     D_db = D_db[:bin_max, :]
 
-    fig, ax = plt.subplots(figsize=(8, 3), dpi=150)
+    fig, ax = plt.subplots(figsize=(5, 4), dpi=150)
     librosa.display.specshow(
         D_db, sr=SR, hop_length=HOP_LENGTH,
         x_axis="time", y_axis="linear",
@@ -52,6 +52,7 @@ def generate_spectrogram(wav_path: str, output_path: str):
     )
     ax.set_xlabel("Time (s)", fontsize=9)
     ax.set_ylabel("Frequency (Hz)", fontsize=9)
+    ax.set_xticks(np.arange(0.0, T_MAX + 0.01, 0.5))
     ax.tick_params(labelsize=8)
 
     plt.tight_layout()

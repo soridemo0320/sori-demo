@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audio demo</title>
+  <title>Sori: Audio Demo</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -84,8 +84,7 @@
     .system-title {
       font-size: 0.78em;
       font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      letter-spacing: 0.04em;
       color: #555;
       margin-bottom: 8px;
     }
@@ -140,30 +139,30 @@
 </head>
 <body>
 
-  <h1>Audio demo</h1>
-  <p class="subtitle">Anonymous submission</p>
+  <h1>Sori: Streamable and Controllable General Audio-to-Symbolic Music Transformation</h1>
+  <p class="subtitle">Audio Demo</p>
 
   <div id="container"></div>
 
   <div class="references">
-    <p>[1] ... (Deep Salience)</p>
-    <p>[2] ... (Basic Pitch)</p>
-    <p>[3] ... (Timbre Trap)</p>
+    <p>[1] Bittner, Rachel M., et al. "Deep Salience Representations for F0 Estimation in Polyphonic Music." <em>ISMIR</em>, 2017.</p>
+    <p>[2] Bittner, Rachel M., et al. "A Lightweight Instrument-Agnostic Model for Polyphonic Note Transcription and Multipitch Estimation." <em>ICASSP</em>, IEEE, 2022.</p>
+    <p>[3] Cwitkowitz, Frank, et al. "Timbre-Trap: A Low-Resource Framework for Instrument-Agnostic Music Transcription." <em>ICASSP</em>, IEEE, 2024.</p>
   </div>
 
 <script>
 // ── Data ─────────────────────────────────────────────────────────
 const SAMPLES = [
-  { id: "000852", dir: "000852_4.0", ytId: "1VTxnf2hZ0w" },
-  { id: "001239", dir: "001239_4.0", ytId: "2m9rVrVNa6A" },
-  { id: "001349", dir: "001349_4.0", ytId: "37UUg0fwzsw" },
-  { id: "001376", dir: "001376_4.5", ytId: "3EcfiEc08zY" },
-  { id: "001383", dir: "001383_5.0", ytId: "3FYXBkD5bYk" },
-  { id: "001676", dir: "001676_4.3", ytId: "4G92jhdrbhs" },
-  { id: "001902", dir: "001902_4.0", ytId: "54LSA7aZTBA" },
-  { id: "002009", dir: "002009_5.0", ytId: "5Y_mT93tkvQ" },
-  { id: "002037", dir: "002037_5.5", ytId: "5e8dnZnkLkw" },
-  { id: "002044", dir: "002044_5.0", ytId: "5fzwZ3YnYi8" },
+  { id: "000852", dir: "000852_4.0", prefix: "000852_4.0/000852_1VTxnf2hZ0w" },
+  { id: "001239", dir: "001239_4.0", prefix: "001239_4.0/001239_2m9rVrVNa6A" },
+  { id: "001349", dir: "001349_4.0", prefix: "001349_4.0/001349_37UUg0fwzsw" },
+  { id: "001376", dir: "001376_4.5", prefix: "001376_4.5/001376_3EcfiEc08zY" },
+  { id: "001383", dir: "001383_5.0", prefix: "001383_5.0/001383_3FYXBkD5bYk" },
+  { id: "001676", dir: "001676_4.3", prefix: "001676_4.3/001676_4G92jhdrbhs" },
+  { id: "001902", dir: "001902_4.0", prefix: "001902_4.0/001902_54LSA7aZTBA" },
+  { id: "002009", dir: "002009_5.0", prefix: "002009_5.0/002009_5Y_mT93tkvQ" },
+  { id: "002037", dir: "002037_5.5", prefix: "002037_5.5/002037_5e8dnZnkLkw" },
+  { id: "002044", dir: "002044_5.0", prefix: "002044_5.0/002044_5fzwZ3YnYi8" },
 ];
 
 const GAMMAS = [0.0, 0.5, 1.0, 2.0, 3.0];
@@ -175,54 +174,11 @@ const BASELINES = [
 ];
 
 function audioPath(s, variant) {
-  return `${s.dir}/${s.id}_${s.ytId}_${variant}.wav`;
-}
-
-// ── Channel routing via Web Audio API ────────────────────────────
-// Shared AudioContext — created once, routed at DOM build time.
-let sharedCtx = null;
-
-function getCtx() {
-  if (!sharedCtx) {
-    try {
-      sharedCtx = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) { return null; }
-  }
-  return sharedCtx;
-}
-
-// Resume context on first any-click (covers native audio controls too)
-document.addEventListener("click", () => {
-  if (sharedCtx && sharedCtx.state === "suspended") sharedCtx.resume();
-}, { once: false });
-
-function attachChannelRoute(audioEl, mode) {
-  // Always resume on play, regardless of mode
-  audioEl.addEventListener("play", () => {
-    if (sharedCtx && sharedCtx.state === "suspended") sharedCtx.resume();
-  });
-
-  if (mode === "stereo") return;
-
-  // Set up routing immediately (not lazily) so it's ready before first play
-  const ctx = getCtx();
-  if (!ctx) return;
-  try {
-    const src = ctx.createMediaElementSource(audioEl);
-    const ch = mode === "left" ? 0 : 1;
-    const split = ctx.createChannelSplitter(2);
-    const merge = ctx.createChannelMerger(2);
-    src.connect(split);
-    split.connect(merge, ch, 0);
-    split.connect(merge, ch, 1);
-    merge.connect(ctx.destination);
-  } catch (e) {
-    console.warn("Channel routing failed, playing stereo:", e);
-  }
+  return `${s.prefix}_${variant}.wav`;
 }
 
 // ── UI helpers ───────────────────────────────────────────────────
-function mkAudioItem(label, url, mode) {
+function mkAudioItem(label, url) {
   const item = document.createElement("div");
   item.className = "audio-item";
 
@@ -235,7 +191,6 @@ function mkAudioItem(label, url, mode) {
   audio.src = url;
   audio.controls = true;
   audio.preload = "none";
-  attachChannelRoute(audio, mode);
   item.appendChild(audio);
 
   return item;
@@ -251,8 +206,8 @@ function mkCell(sample, variant, headerLabel) {
   cell.appendChild(hdr);
 
   const url = audioPath(sample, variant);
-  cell.appendChild(mkAudioItem("Rendered", url, "right"));
-  cell.appendChild(mkAudioItem("Input+rendered", url, "stereo"));
+  cell.appendChild(mkAudioItem("Rendered", url));
+  cell.appendChild(mkAudioItem("Input + Rendered", url));
   return cell;
 }
 
@@ -295,7 +250,7 @@ function buildSample(s, idx) {
   inputSec.appendChild(img);
 
   const inputUrl = audioPath(s, "300k_sori_0.0");
-  inputSec.appendChild(mkAudioItem("Input audio", inputUrl, "left"));
+  inputSec.appendChild(mkAudioItem("Input Audio", inputUrl));
   card.appendChild(inputSec);
 
   // Sori (Proposed)
