@@ -179,29 +179,46 @@ function audioPath(s, variant) {
 }
 
 // ── Channel routing via Web Audio API ────────────────────────────
-// Works on HTTPS (GitHub Pages). On file:// falls back to stereo.
-function attachChannelRoute(audioEl, mode) {
-  if (mode === "stereo") return;
-  let done = false;
-  audioEl.addEventListener("play", async () => {
-    if (done) return;
-    done = true;
+// Shared AudioContext — created once, routed at DOM build time.
+let sharedCtx = null;
+
+function getCtx() {
+  if (!sharedCtx) {
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      if (ctx.state !== "running") await ctx.resume();
-      const src = ctx.createMediaElementSource(audioEl);
-      const ch = mode === "left" ? 0 : 1;
-      const split = ctx.createChannelSplitter(2);
-      const merge = ctx.createChannelMerger(2);
-      src.connect(split);
-      split.connect(merge, ch, 0);
-      split.connect(merge, ch, 1);
-      merge.connect(ctx.destination);
-    } catch (e) {
-      console.warn("Channel routing failed, playing stereo:", e);
-      done = false; // allow retry
-    }
+      sharedCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) { return null; }
+  }
+  return sharedCtx;
+}
+
+// Resume context on first any-click (covers native audio controls too)
+document.addEventListener("click", () => {
+  if (sharedCtx && sharedCtx.state === "suspended") sharedCtx.resume();
+}, { once: false });
+
+function attachChannelRoute(audioEl, mode) {
+  // Always resume on play, regardless of mode
+  audioEl.addEventListener("play", () => {
+    if (sharedCtx && sharedCtx.state === "suspended") sharedCtx.resume();
   });
+
+  if (mode === "stereo") return;
+
+  // Set up routing immediately (not lazily) so it's ready before first play
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const src = ctx.createMediaElementSource(audioEl);
+    const ch = mode === "left" ? 0 : 1;
+    const split = ctx.createChannelSplitter(2);
+    const merge = ctx.createChannelMerger(2);
+    src.connect(split);
+    split.connect(merge, ch, 0);
+    split.connect(merge, ch, 1);
+    merge.connect(ctx.destination);
+  } catch (e) {
+    console.warn("Channel routing failed, playing stereo:", e);
+  }
 }
 
 // ── UI helpers ───────────────────────────────────────────────────
