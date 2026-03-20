@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 24px 20px;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 1.6em;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #777;
+      font-size: 0.95em;
+      margin-bottom: 28px;
+    }
+
+    /* ── Sample section ──────────────────────────────────────── */
+    .sample-section {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .sample-header {
+      font-size: 1.15em;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+    }
+
+    /* ── Input audio row ─────────────────────────────────────── */
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #eee;
+    }
+    .input-spec-img {
+      width: 280px;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .input-label {
+      font-weight: 600;
+      font-size: 0.95em;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    /* ── System section ──────────────────────────────────────── */
+    .system-block {
+      margin-bottom: 20px;
+    }
+    .system-title {
+      font-weight: 700;
+      font-size: 0.9em;
+      color: #333;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .cells-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    /* ── Cell ────────────────────────────────────────────────── */
+    .cell {
+      flex: 1;
+      min-width: 150px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 8px;
+      background: #fafafa;
+      text-align: center;
+    }
+    .cell-header {
+      font-size: 0.8em;
+      color: #555;
+      margin-bottom: 6px;
+      font-style: italic;
+      white-space: nowrap;
+    }
+    .cell-spec-img {
+      width: 100%;
+      height: 72px;
+      object-fit: cover;
+      object-position: left center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    .btn {
+      display: block;
+      width: 100%;
+      margin: 3px 0;
+      padding: 5px 6px;
+      font-size: 0.75em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: opacity 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .btn:disabled { cursor: not-allowed; opacity: 0.6; }
+
+    .btn-input  { background: #4a90d9; color: white; font-size: 0.88em; padding: 7px 14px; border-radius: 6px; }
+    .btn-input:hover:not(:disabled)  { background: #3a7bc8; }
+    .btn-mono   { background: #5ba35b; color: white; }
+    .btn-mono:hover:not(:disabled)   { background: #4a8f4a; }
+    .btn-stereo { background: #d4882a; color: white; }
+    .btn-stereo:hover:not(:disabled) { background: #be7824; }
+
+    .btn.playing { outline: 2px solid rgba(0,0,0,0.25); }
+    .btn-stop { background: #c0392b !important; }
+
+    /* ── References ──────────────────────────────────────────── */
+    .references {
+      margin-top: 40px;
+      font-size: 0.82em;
+      color: #666;
+      border-top: 1px solid #ddd;
+      padding-top: 16px;
+    }
+    .references p { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+  <h1>Audio Demo</h1>
+  <p class="subtitle">Anonymous submission</p>
+
+  <div id="container"></div>
+
+  <div class="references">
+    <p>[1] Bitteur, J. et al. (Deep Salience)</p>
+    <p>[2] Bitteur, J. et al. (Basic Pitch)</p>
+    <p>[3] Bitteur, J. et al. (Timbre Trap)</p>
+  </div>
+
+  <script>
+  // ── Data ─────────────────────────────────────────────────────────
+  const SAMPLES = [
+    { id: "000852", dir: "000852_4.0", ytId: "1VTxnf2hZ0w" },
+    { id: "001239", dir: "001239_4.0", ytId: "2m9rVrVNa6A" },
+    { id: "001349", dir: "001349_4.0", ytId: "37UUg0fwzsw" },
+    { id: "001376", dir: "001376_4.5", ytId: "3EcfiEc08zY" },
+    { id: "001383", dir: "001383_5.0", ytId: "3FYXBkD5bYk" },
+    { id: "001676", dir: "001676_4.3", ytId: "4G92jhdrbhs" },
+    { id: "001902", dir: "001902_4.0", ytId: "54LSA7aZTBA" },
+    { id: "002009", dir: "002009_5.0", ytId: "5Y_mT93tkvQ" },
+    { id: "002037", dir: "002037_5.5", ytId: "5e8dnZnkLkw" },
+    { id: "002044", dir: "002044_5.0", ytId: "5fzwZ3YnYi8" },
+  ];
+
+  const GAMMAS = [0.0, 0.5, 1.0, 2.0, 3.0];
+
+  const BASELINES = [
+    { suffix: "ds", label: "Deep Salience [1]" },
+    { suffix: "bp", label: "Basic Pitch [2]" },
+    { suffix: "tt", label: "Timbre Trap [3]" },
+  ];
+
+  // ── Audio path helper ─────────────────────────────────────────────
+  function audioPath(s, variant) {
+    return `${s.dir}/${s.id}_${s.ytId}_${variant}.wav`;
+  }
+
+  // ── Web Audio playback ────────────────────────────────────────────
+  let ctx = null;
+  let currentSource = null;
+  let activeBtn = null;
+  const cache = {};
+
+  function getCtx() {
+    if (!ctx || ctx.state === "closed") {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return ctx;
+  }
+
+  function stopCurrent() {
+    if (currentSource) {
+      try { currentSource.stop(); } catch (_) {}
+      currentSource = null;
+    }
+    if (activeBtn) {
+      activeBtn.textContent = activeBtn._orig;
+      activeBtn.classList.remove("playing", "btn-stop");
+      activeBtn = null;
+    }
+  }
+
+  async function playAudio(url, mode, btn) {
+    if (activeBtn === btn) { stopCurrent(); return; }
+    stopCurrent();
+
+    const ac = getCtx();
+    if (ac.state === "suspended") await ac.resume();
+
+    btn._orig = btn._orig || btn.textContent;
+    btn.textContent = "⏳";
+    btn.disabled = true;
+
+    try {
+      if (!cache[url]) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+        const ab = await res.arrayBuffer();
+        cache[url] = await ac.decodeAudioData(ab);
+      }
+      const buf = cache[url];
+      const src = ac.createBufferSource();
+      src.buffer = buf;
+
+      if (mode === "stereo") {
+        src.connect(ac.destination);
+      } else {
+        const ch = mode === "left" ? 0 : 1;
+        const split  = ac.createChannelSplitter(2);
+        const merge  = ac.createChannelMerger(2);
+        src.connect(split);
+        split.connect(merge, ch, 0);  // → L
+        split.connect(merge, ch, 1);  // → R (duplicate for mono)
+        merge.connect(ac.destination);
+      }
+
+      src.onended = () => {
+        if (currentSource === src) stopCurrent();
+      };
+
+      btn.textContent = "⏹ Stop";
+      btn.classList.add("playing", "btn-stop");
+      btn.disabled = false;
+      activeBtn = btn;
+      currentSource = src;
+      src.start();
+    } catch (err) {
+      btn.textContent = btn._orig;
+      btn.disabled = false;
+      console.error(err);
+    }
+  }
+
+  // ── UI helpers ────────────────────────────────────────────────────
+  function mkBtn(text, cls, url, mode) {
+    const b = document.createElement("button");
+    b.className = `btn ${cls}`;
+    b.textContent = text;
+    b._orig = text;
+    b.onclick = () => playAudio(url, mode, b);
+    return b;
+  }
+
+  function mkCell(sample, variant, label) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    const hdr = document.createElement("div");
+    hdr.className = "cell-header";
+    hdr.textContent = label;
+    cell.appendChild(hdr);
+
+    // spectrogram thumbnail (same image for all variants in this sample)
+    const img = document.createElement("img");
+    img.src = `images/${sample.id}_spec.png`;
+    img.className = "cell-spec-img";
+    img.alt = "CQT spectrogram";
+    cell.appendChild(img);
+
+    const url = audioPath(sample, variant);
+    cell.appendChild(mkBtn("▶ Rendered (Mono)",         "btn-mono",   url, "right"));
+    cell.appendChild(mkBtn("▶ Input+Rendered (Stereo)", "btn-stereo", url, "stereo"));
+    return cell;
+  }
+
+  // ── Build one sample section ──────────────────────────────────────
+  function buildSample(s, idx) {
+    const sec = document.createElement("div");
+    sec.className = "sample-section";
+
+    // header
+    const hdr = document.createElement("div");
+    hdr.className = "sample-header";
+    hdr.textContent = `Sample ${idx + 1}`;
+    sec.appendChild(hdr);
+
+    // ── Input audio row
+    const inputRow = document.createElement("div");
+    inputRow.className = "input-row";
+
+    const specImg = document.createElement("img");
+    specImg.src = `images/${s.id}_spec.png`;
+    specImg.className = "input-spec-img";
+    specImg.alt = "CQT spectrogram of input audio";
+    inputRow.appendChild(specImg);
+
+    const inputInfo = document.createElement("div");
+    const lbl = document.createElement("div");
+    lbl.className = "input-label";
+    lbl.textContent = "Input Audio";
+    inputInfo.appendChild(lbl);
+    // Use left channel of any sori file (all share the same input)
+    const inputUrl = audioPath(s, "300k_sori_0.0");
+    inputInfo.appendChild(mkBtn("▶ Play Input Audio", "btn-input", inputUrl, "left"));
+    inputRow.appendChild(inputInfo);
+    sec.appendChild(inputRow);
+
+    // ── Sori (Proposed)
+    sec.appendChild(mkSystemBlock(
+      "Sori (Proposed)",
+      GAMMAS.map(g => ({
+        variant: `300k_sori_${g.toFixed(1)}`,
+        label: `γ = ${g.toFixed(1)}`,
+      })),
+      s
+    ));
+
+    // ── Sori (w/o DAT)
+    sec.appendChild(mkSystemBlock(
+      "Sori (w/o DAT)",
+      GAMMAS.map(g => ({
+        variant: `300k_sori_no_adv_${g.toFixed(1)}`,
+        label: `γ = ${g.toFixed(1)}`,
+      })),
+      s
+    ));
+
+    // ── Baselines
+    sec.appendChild(mkSystemBlock(
+      "Baselines",
+      BASELINES.map(b => ({ variant: b.suffix, label: b.label })),
+      s
+    ));
+
+    return sec;
+  }
+
+  function mkSystemBlock(title, entries, sample) {
+    const block = document.createElement("div");
+    block.className = "system-block";
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "system-title";
+    titleEl.textContent = title;
+    block.appendChild(titleEl);
+
+    const row = document.createElement("div");
+    row.className = "cells-row";
+    for (const e of entries) {
+      row.appendChild(mkCell(sample, e.variant, e.label));
+    }
+    block.appendChild(row);
+    return block;
+  }
+
+  // ── Render all samples ────────────────────────────────────────────
+  const container = document.getElementById("container");
+  SAMPLES.forEach((s, i) => container.appendChild(buildSample(s, i)));
+
+  </script>
+</body>
+</html>
