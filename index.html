@@ -173,8 +173,9 @@ const BASELINES = [
   { suffix: "tt", label: "Timbre Trap [3]" },
 ];
 
+const CACHE_BUST = "v=2";
 function audioPath(s, variant) {
-  return `${s.prefix}_${variant}.wav`;
+  return `${s.prefix}_${variant}.wav?${CACHE_BUST}`;
 }
 
 // ── UI helpers ───────────────────────────────────────────────────
